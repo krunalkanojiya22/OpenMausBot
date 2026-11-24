@@ -145,6 +145,9 @@ export function createConfigRoutes(deps: ConfigRouteDeps): RouteHandler {
       }
       if (hostedModels && ["instances", "anthropic", "openai", "openrouter", "openaiCompat", "xai", "mistral", "cerebras", "groq", "greenference", "modelgo", "meta", "opencodeGo"].some(key => Object.hasOwn(body, key))) return json(res, 403, { error: HOSTED_PROVIDER_SETTINGS_ERROR });
       const patch = parseConfigPatchForPerson(body);
+      if (patch.budgets !== undefined || patch.billing !== undefined) {
+        return json(res, 400, { error: "Monthly spend limits and sell prices are unavailable in this edition." });
+      }
       if (deps.cloudTeam && patch.browserEngine?.egress?.proxy !== undefined && !(auth.kind === "session" && auth.session.teamRole === "owner")) {
         return json(res, 403, { error: "Only the Team Cloud owner can configure the browser proxy." });
       }

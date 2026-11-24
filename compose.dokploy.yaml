@@ -1,0 +1,27 @@
+services:
+  omb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: server
+      args:
+        ENGINES: "${OMB_DOKPLOY_ENGINES:-}"
+    init: true
+    shm_size: 512m
+    restart: unless-stopped
+    expose:
+      - "8799"
+    environment:
+      OMB_LAN: "1"
+      OMB_LOOPBACK_TRUST: service
+      OMB_PUBLIC_URL: "${OMB_PUBLIC_URL:?Set OMB_PUBLIC_URL to your HTTPS domain}"
+      OMB_SIGNIN_EMAILS: "${OMB_SIGNIN_EMAILS:?Set OMB_SIGNIN_EMAILS to the workspace admin email}"
+      OMB_SIGNIN_MEMBER_EMAILS: "${OMB_SIGNIN_MEMBER_EMAILS:-}"
+      OMB_SIGNIN_SMTP_URL: "${OMB_SIGNIN_SMTP_URL:-}"
+      OMB_SIGNIN_SMTP_FROM: "${OMB_SIGNIN_SMTP_FROM:-}"
+      OMB_DISABLE_ANNOUNCEMENTS: "1"
+    volumes:
+      - data:/data
+
+volumes:
+  data:

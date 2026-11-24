@@ -116,7 +116,7 @@ describe("a routine's run refused the lent computer (server/host/refused-lending
   });
 
   it("reads in the language of the chat: the run's for a failure, the chat it reports to for the line under a reply", () => {
-    // A pack of its own: the catalogs themselves are the locale tests' to read (scripts/ci-scope.test.ts).
+    // A pack of its own: the catalogs themselves are the locale tests' to read.
     addServerLinePacks({ xx: { "server.runs.lentComputerUnconfirmed": "{name} · {device}" } });
     const { refused } = fixture({ language: "xx" });
     refused.refused("t", "run_1", "Plano da manhã", true);

@@ -46,8 +46,8 @@ native-package and `CUA_DRIVER_PATH` executables receive the version check,
 without that ZIP checksum check. See
 [`scripts/prepare-cua-win.mjs`](../scripts/prepare-cua-win.mjs) and the Windows
 `extraResources` in [`electron-builder.yml`](../electron-builder.yml). The
-Windows CUA host smoke job in [CI](../.github/workflows/ci.yml) exercises the
-staged host and read-only lending. Preview-only screen capture is a separate
+Windows smoke commands `pnpm smoke:cua-win` and `pnpm smoke:cua-win-lend`
+exercise the staged host and read-only lending. Preview-only screen capture is a separate
 capability and is currently unavailable on Windows.
 
 ## Local desktop use: CUA only — Electron owns the driver lifecycle

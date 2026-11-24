@@ -24,7 +24,6 @@ function fixture(options: { busy?: boolean; roomWorking?: boolean } = {}) {
   const deps: PersonReplyDeps = {
     store,
     sendSequencer: new SendSequencer(),
-    assertWithinBudget: () => {},
     messageSender: () => undefined,
     usageTriggerFor: () => ({ kind: "user" }),
     groupThreadIsWorking: () => options.roomWorking === true,

@@ -61,8 +61,8 @@ export const USAGE = `openmausbot — your team of AI bots, ready in a few steps
   openmausbot sentinel [--data-dir DIR] [--out DIR] [--once] [--json]   (read-only health scan; see --help)
   openmausbot config backups | restore NAME    (dated copies of the settings file; see --help)
   openmausbot browser install [--with-deps] | status
-  openmausbot fleet init --domain HOST [--operator USER] | create NAME --admin EMAIL [--member EMAIL] [--brand FILE]
-                    [--anthropic-key-file FILE] [--cap USD] [--license-key KEY] [--memory 1G]
+  openmausbot fleet init --domain HOST [--operator USER] | create NAME --admin EMAIL [--member EMAIL]
+                    [--anthropic-key-file FILE] [--memory 1G]
                   | list | users NAME add|remove EMAIL [--chat-only] | suspend NAME | resume NAME
                   | delete NAME --yes [--keep-data] | upgrade   (all take --dry-run)
                   | agent [--socket PATH] [--group USER]   (root; installed by init --operator)
@@ -95,7 +95,7 @@ browser install: the bots' browser engine (agent-browser, pinned) into the
         browser install as the user running serve, from that user's home.
         status: what the current user and data directory have.
 fleet   many client workspaces on one Linux server, each its own account,
-        service, data folder, brand, sign-in list and keys at NAME.HOST
+        service, data folder, sign-in list and keys at NAME.HOST
         behind the system Caddy. Plans are printed unless run as root;
         --dry-run always prints. Install the package permanently first.
         init --operator USER also installs the fleet agent, a root service

@@ -2,7 +2,6 @@
 // the bundled copy, the disk cache and the hourly download, as the model manifest keeps its list).
 import { join } from "node:path";
 
-import bundledFeedJson from "../../announcements/announcements.json" with { type: "json" };
 import { ANNOUNCEMENTS_URL, liveCards, parseAnnouncementFeed, type AnnouncementCard, type AnnouncementFeed } from "../../shared/announcements.ts";
 import { DATA_DIR } from "../config.ts";
 import {
@@ -17,9 +16,7 @@ export const ANNOUNCEMENTS_FETCH_TIMEOUT_MS = REMOTE_FILE_FETCH_TIMEOUT_MS;
 export const ANNOUNCEMENTS_MAX_BYTES = 64 * 1024;
 export const ANNOUNCEMENTS_FIRST_WAIT_MS = REMOTE_FILE_FIRST_WAIT_MS;
 
-const parsedBundle = parseAnnouncementFeed(bundledFeedJson, { strict: true, nowMs: Number.MAX_SAFE_INTEGER / 2 });
-if (!parsedBundle.ok) throw new Error(`The bundled announcements are invalid (${parsedBundle.error})`);
-export const BUNDLED_ANNOUNCEMENTS: AnnouncementFeed = parsedBundle.feed;
+export const BUNDLED_ANNOUNCEMENTS: AnnouncementFeed = { version: 1, updatedAt: new Date(0).toISOString(), cards: [] };
 
 /** Under providers/, as the manifest's cache is, so backups and Move to Cloud leave it out. */
 export function announcementsCachePath(dataDir: string): string {

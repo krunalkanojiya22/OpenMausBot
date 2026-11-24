@@ -13,7 +13,6 @@ import type { TraceList, TraceRootSummary } from "../../shared/usage-trace";
 import { BotAvatar } from "./Avatar";
 import { PlanUsage } from "./PlanUsage";
 import { Select } from "./Select";
-import { UsageBudgetCards, type BudgetState } from "./UsageBudget";
 import { UsageCapsCard, type UsageCapView } from "./UsageCaps";
 import { TraceView } from "./usage/TraceView";
 import { LiveBadge, modelName } from "./usage/TraceWaterfall";
@@ -41,7 +40,6 @@ interface UsageSummary {
   groups: UsageGroup[];
   /** The period as a whole; `unpriced` counts its turns whose model has no price, booked at $0. */
   total?: { turns: number; unpriced: number };
-  budget?: BudgetState | null;
   caps?: UsageCapView | null;
   /** Dollars booked on engines signed in with a subscription: an estimate nobody is billed. */
   notBilled?: { usd: number; turns: number };
@@ -290,7 +288,6 @@ export function UsageSection() {
   const [error, setError] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
   const summary = useUsageGroups(range, "bot", version);
-  const budget = summary?.budget ?? null;
   const [open, setOpen] = useState<{ id: string; at: number } | null>(null);
   const pending = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -358,7 +355,6 @@ export function UsageSection() {
         </>}
         <PlanUsage />
         <UsageCapsCard view={summary?.caps} onSaved={() => setVersion((value) => value + 1)} />
-        <UsageBudgetCards budget={budget} />
       </div>
     );
   }
@@ -402,7 +398,6 @@ export function UsageSection() {
       )}
       <PlanUsage />
       <UsageCapsCard view={summary?.caps} onSaved={() => setVersion((value) => value + 1)} />
-      <UsageBudgetCards budget={budget} />
     </div>
   );
 }

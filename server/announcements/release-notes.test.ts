@@ -3,7 +3,6 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { compareVersions } from "../../shared/announcements.ts";
 import { RELEASES_URL, type ReleaseFeed } from "../../shared/release-notes.ts";
 import { ANNOUNCEMENTS_DISABLE_ENV } from "./remote-file.ts";
 import { BUNDLED_RELEASES, ReleaseNotesStore, releasesCachePath, RELEASES_MAX_BYTES } from "./release-notes.ts";
@@ -23,12 +22,8 @@ function subject(options: { fetch?: typeof fetch; dir?: string; env?: NodeJS.Pro
   return { store, log };
 }
 
-it("bundles the repository's file: newest first, at most twenty, and well under the size an install reads", () => {
-  expect(BUNDLED_RELEASES.releases.length).toBeGreaterThan(0);
-  expect(BUNDLED_RELEASES.releases.length).toBeLessThanOrEqual(20);
-  const versions = BUNDLED_RELEASES.releases.map((entry) => entry.version);
-  expect([...versions].sort((a, b) => compareVersions(b, a) ?? 0)).toEqual(versions);
-  expect(Buffer.byteLength(JSON.stringify(BUNDLED_RELEASES))).toBeLessThan(RELEASES_MAX_BYTES);
+it("starts with an empty feed before a cache or download is available", () => {
+  expect(BUNDLED_RELEASES).toEqual({ version: 1, updatedAt: "1970-01-01T00:00:00.000Z", releases: [] });
 });
 
 describe("the release notes store", () => {

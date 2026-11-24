@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { BOX_ENV_NAMES, BOX_ENV_NEVER, BOX_ENV_OMB_NAMES, BOX_ENV_OMB_PREFIXES, boxEnvironment, boxEnvironmentAllows, instanceEnvNames } from "./env.ts";
@@ -65,8 +65,8 @@ const ROOT = new URL("../../", import.meta.url);
 
 /** The `OMB_` names in the code the server runs, and in what starts it (the desktop app). */
 function knownOmbNames(): string[] {
-  const files = execFileSync("git", ["ls-files", "server", "shared", "packages", "enterprise/server", "electron"], { cwd: ROOT, encoding: "utf8" })
-    .split("\n").filter((file) => /\.(?:ts|mts|mjs|cjs|js)$/.test(file) && !/\.test\.|\/testing\/|node-test/.test(file));
+  const files = execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "server", "shared", "packages", "electron"], { cwd: ROOT, encoding: "utf8" })
+    .split("\n").filter((file) => /\.(?:ts|mts|mjs|cjs|js)$/.test(file) && !/\.test\.|\/testing\/|node-test/.test(file) && existsSync(new URL(file, ROOT)));
   const names = new Set<string>();
   for (const file of files) for (const match of readFileSync(new URL(file, ROOT), "utf8").matchAll(/\bOMB_[A-Z0-9_]+\b/g)) names.add(match[0]);
   return [...names].sort();

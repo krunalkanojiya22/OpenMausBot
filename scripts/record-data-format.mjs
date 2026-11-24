@@ -1,5 +1,5 @@
 // Writes server/data-format-released.json: the data formats the release being prepared writes and reads, which the
-// next release's changes are held against (server/data-format.test.ts). prepare-release.yml runs it with the version bump.
+// next release's changes are held against (server/data-format.test.ts). Run with the version bump.
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 

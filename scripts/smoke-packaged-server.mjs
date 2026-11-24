@@ -77,8 +77,6 @@ const fixtureEnv = {
   OMB_DATA_DIR: join(home, ".openmausbot"),
   OMB_PORT: String(port),
   OMB_WEBHOOK_PORT: String(webhookPort),
-  // Not a genuine key: enough to make the server look for its enterprise layer.
-  OMB_LICENSE_KEY: "omb1.not.real",
   ...(browserBundle ? {
     OMB_RESOURCES_PATH: staging,
     // A global engine on the developer's PATH must not make this test pass.
@@ -163,9 +161,7 @@ writeFileSync(
   ].join("\n"),
 );
 
-// The packaged tree carries the bundled enterprise layer inside the server
-// root, or a licensed install silently runs the open-source edition.
-const layerShipped = existsSync(join(staging, "server", "enterprise", "server", "index.js"));
+const layerShipped = existsSync(join(staging, "server", "enterprise"));
 let editionReport = null;
 if (listening) {
   try {
@@ -466,8 +462,8 @@ if (searchReport?.status !== 200 || !Array.isArray(searchReport.body?.hits)) {
   process.exit(1);
 }
 
-if (layerShipped && (!editionReport || editionReport.error || String(editionReport.notice ?? "").includes("no enterprise layer exists"))) {
-  console.error("the packaged server ships an enterprise layer but did not find it:");
+if (layerShipped || editionReport?.edition !== "oss" || !Array.isArray(editionReport.features) || editionReport.features.length !== 0) {
+  console.error("expected an open-source server bundle with an empty feature list:");
   console.error(JSON.stringify(editionReport, null, 2));
   process.exit(1);
 }
@@ -526,5 +522,5 @@ console.log("packaged backup worker exported an encrypted archive ✓");
 console.log("packaged loopback trust gate: health serves, a public mutation is refused at service trust ✓");
 if (launcherReport) console.log("packaged container launcher ran the server as its child and stopped it cleanly ✓");
 if (desktopEntryReport) console.log(`packaged desktop entry started the server twice on its compile cache (${desktopEntryReport.starts[0].cached.length} entries) ✓`);
-if (layerShipped) console.log("packaged server found its enterprise layer inside the server dir ✓");
+console.log("packaged server runs the open-source edition ✓");
 if (browserBundle) console.log(`packaged browser discovered without installation; access on by default ✓ ${JSON.stringify(browserReport)}`);

@@ -57,7 +57,6 @@ function fixture(rows: Message[] = [], overrides: Partial<PeerLimitResendDeps<Op
     quotaSwitchEnabled: () => true,
     policyModelRefusal: () => undefined,
     checkedTaskModelSwitch: (_bot: unknown, selection: unknown) => ({ ok: true, selection }),
-    assertWithinBudget: () => undefined,
     handedOff: (id: string) => id === "child",
     guest: () => false,
     generation: () => generation,

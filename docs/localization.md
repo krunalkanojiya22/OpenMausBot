@@ -32,9 +32,8 @@ English each translation was made from. A pull request normally does not edit it
 - a removed key's hash is left in place and ignored;
 - a key whose recorded hash no longer matches today's English fails the check.
 
-The release bump (`prepare-release.yml`) runs
-`node scripts/generate-locale.mjs --record-hashes` and commits the file with
-the bump. For every translated key without a hash it records the hash of the
+When preparing a release, run `node scripts/generate-locale.mjs --record-hashes`
+and commit the file with the version bump. For every translated key without a hash it records the hash of the
 English the translation was written against: `git blame` finds the commit that
 last changed the translated value, and the hash is of `en.json`'s text for
 that key in that commit. If the English changed since, the key is recorded
@@ -74,9 +73,7 @@ pnpm i18n:check
 
 Commit `src/locales/source-hashes.json` with the catalog in that case only;
 adding new keys and their translations needs no hash edit. The hash contains
-no translation content or credential; it only lets CI detect stale copy.
+no translation content or credential. `pnpm i18n:check` uses it to detect stale copy.
 
 Model output is a draft, not an authority. Review tone, terminology, grammar,
-product names, and safety-sensitive copy before committing it. AI translation
-does not run in GitHub Actions: normal CI stays deterministic, secret-free,
-and safe for forks.
+product names, and safety-sensitive copy before committing it.

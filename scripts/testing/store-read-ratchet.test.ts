@@ -160,7 +160,6 @@ const READS: Record<string, number> = {
   "src/components/WebhookTrigger.tsx": 1,
   "src/components/WindowFrameBar.tsx": 1,
   "src/components/WindowPlaceTitle.tsx": 1,
-  "src/components/WorkspacesSection.tsx": 1,
   "src/components/XCard.tsx": 1,
   "src/components/announcements/AnnouncementsPage.tsx": 2,
   "src/components/announcements/use-announcements.ts": 1,

@@ -6,7 +6,6 @@ import { describe, expect, it } from "vitest";
 import { announcementProblems, lf, MAX_DAYS_AHEAD, MAX_FILE_BYTES, MAX_IMAGE_BYTES, schemaText } from "./check-announcements.mjs";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
-const committed = read("announcements/announcements.json");
 const example = JSON.parse(read("scripts/testing/fixtures/announcements.example.json"));
 const NOW = Date.parse("2026-12-01T10:00:00Z");
 const DAY = 24 * 60 * 60 * 1000;
@@ -15,24 +14,12 @@ const problems = (value, options = {}) => announcementProblems(typeof value === 
 const tip = (extra = {}) => ({ ...structuredClone(example.cards[0]), ...extra });
 const withCards = (...cards) => ({ ...structuredClone(example), cards });
 
-describe("the committed file", () => {
-  it("is valid", () => {
-    expect(announcementProblems(committed)).toEqual([]);
-  });
-
-  it("has its JSON Schema beside it, up to date with the app's own rules", () => {
-    expect(lf(read("announcements/announcements.schema.json")), "run node scripts/check-announcements.mjs --write-schema").toBe(schemaText());
-  });
-
-  it("the JSON Schema an editor reads takes the committed file and the documented examples", () => {
-    const ajv = new Ajv2020({ strict: false, allErrors: true });
-    // ajv-formats is CommonJS: the plugin is the module and its .default.
-    (formats.default ?? formats)(ajv);
-    const validate = ajv.compile(JSON.parse(schemaText()));
-    expect(validate(JSON.parse(committed)), JSON.stringify(validate.errors)).toBe(true);
-    expect(validate(example), JSON.stringify(validate.errors)).toBe(true);
-    expect(validate(withCards(tip({ kind: "survey" })))).toBe(false);
-  });
+it("the generated JSON Schema accepts the documented examples", () => {
+  const ajv = new Ajv2020({ strict: false, allErrors: true });
+  (formats.default ?? formats)(ajv);
+  const validate = ajv.compile(JSON.parse(schemaText()));
+  expect(validate(example), JSON.stringify(validate.errors)).toBe(true);
+  expect(validate(withCards(tip({ kind: "survey" })))).toBe(false);
 });
 
 describe("what the check refuses", () => {

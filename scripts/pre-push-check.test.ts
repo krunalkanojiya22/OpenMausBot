@@ -18,7 +18,7 @@ describe("what a push's changed files call for", () => {
   });
 
   it("checks nothing for docs alone", () => {
-    expect(names(["README.md", "docs/ci.md"])).toEqual([]);
+    expect(names(["README.md", "docs/releasing.md"])).toEqual([]);
   });
 
   it("checks the catalogs only when one changed", () => {
@@ -28,7 +28,7 @@ describe("what a push's changed files call for", () => {
 
   it("runs a guard only when a source it reads changed", () => {
     expect(guards(["server/index.ts"])).toEqual(["scripts/testing/file-size-ratchet.test.ts", "src/locales/vocabulary.test.ts"]);
-    expect(guards(["scripts/release-ci.mjs"])).toEqual(["scripts/testing/file-size-ratchet.test.ts"]);
+    expect(guards(["scripts/bundle-server.mjs"])).toEqual(["scripts/testing/file-size-ratchet.test.ts"]);
     expect(guards(["src/locales/en.json"])).toEqual(["src/locales/vocabulary.test.ts"]);
     expect(guards(["server/a.test.ts", "server/testing/fake.ts"])).toEqual([]);
   });
@@ -58,7 +58,7 @@ describe("the hook in a checkout without dependencies", () => {
     return { dir, hook };
   }
 
-  it.skipIf(process.platform === "win32")("lets the push go and says CI will check it", () => {
+  it.skipIf(process.platform === "win32")("lets the push go and reports skipped local checks", () => {
     const { dir, hook } = checkout();
     const run = spawnSync(hook, { cwd: dir, encoding: "utf8", input: "", timeout: 10_000 });
     expect(run.status).toBe(0);

@@ -120,9 +120,7 @@ includes screenshots and a `.usage-details.json` next to the fixture log.
 These are renderer checks, not native Windows caption-button verification.
 
 It runs when an agent-browser binary resolves and is skipped with a printed
-reason otherwise; `OMB_UI_E2E=1` forces the verified download. The `ui-smoke`
-job in `.github/workflows/ci.yml` runs it on Ubuntu 24.04 and uploads the
-screenshot; it is not one of the required checks.
+reason otherwise. `OMB_UI_E2E=1` forces the verified download.
 
 ## Mobile text and code blocks
 

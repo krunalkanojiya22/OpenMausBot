@@ -541,6 +541,11 @@ across code changes. To pick up the current ones, rebuild with a new tag:
 docker compose build --build-arg CHROME_CACHE_TAG=$(date +%F) omb && docker compose up -d
 ```
 
+## Dokploy
+
+[Deploy this fork with Dokploy](dokploy.md) using the source-built server image,
+Dokploy's HTTPS routing, and a persistent workspace volume.
+
 ## Running on a container platform (Railway, Render, Kubernetes, Cloud Run)
 
 These platforms run the image's own command, with no `--init`, and usually
@@ -843,8 +848,7 @@ client:
 
 ```sh
 openmausbot fleet create acme --admin owner@acme.test --member @acme.test \
-  --brand /root/acme-brand.json --anthropic-key-file /root/acme-anthropic.key \
-  --cap 50 --memory 1G
+  --anthropic-key-file /root/acme-anthropic.key --memory 1G
 openmausbot fleet users acme add bob@acme.test --chat-only
 openmausbot fleet list
 openmausbot fleet suspend acme      # 503 page, service stopped; resume undoes it
@@ -852,19 +856,9 @@ openmausbot fleet upgrade           # new release, then every running workspace 
 openmausbot fleet delete acme --yes # add --keep-data to keep the home folder
 ```
 
-Give `init` `--operator USER` (the Unix user your own workspace runs as; the
-user behind `sudo` by default) and it also installs the **fleet agent**: a
-root service on a Unix socket only that user may open. Your workspace then
-shows **Settings → Installations** (with the enterprise `admin` feature): create
-an installation, add or remove who may sign in, suspend, resume, delete, upgrade
-all, and see each one's spend this month. Every action goes through the
-agent's audit log at `/var/log/openmausbot/fleet.jsonl`.
-
-`https://acme.example.com` is up when `create` returns; the first admin signs
-in with an emailed code. `OMB_LICENSE_KEY` in the environment (or
-`--license-key`) is carried into every workspace so a partner's white-label
-key covers them all. Not root? Every command prints the exact steps to run as
-root instead, and `--dry-run` always prints.
+The fleet CLI manages workspaces through their system services. The first admin
+signs in with an emailed code. Commands that need root print the steps to run
+as root, and `--dry-run` prints the plan.
 
 ## Signing the engines in without a terminal
 
@@ -1661,33 +1655,12 @@ curl -H "Authorization: Bearer $TOKEN" -o activity.csv \
 starts 30 days ago. Nothing here is sent to your organization's cloud Admin,
 which keeps its own activity log.
 
-## Spend limits and sell prices (enterprise)
+## Usage and cost estimates
 
-With the `budgets` entitlement, **Settings → Usage → Monthly spend limit**
-caps the workspace: once the month's cost reaches it, no bot starts a turn,
-whether a person wrote, a routine fired, a peer asked or a webhook arrived,
-until an admin raises it. A warning shows at a configurable percentage, and
-admins get one in-app notification the first time each month crosses the
-warning and one when it reaches the limit (a new month or a new limit starts
-over).
-
-The figure is every cost in the usage ledger. Claude reports its own cost
-(real on your keys, an equivalent on personal subscriptions). Codex, the
-OpenAI-compatible/OpenRouter engine, Grok, MiniMax and the ACP engines report
-tokens but no price, so the server books an **estimate** from a built-in list
-of vendor list prices (`server/model-prices.ts`, each entry with its source
-and the date it was read) and marks the row `costSource: "estimated"`. A model
-that is not in the list is unpriced and not counted; Usage says how many
-turns that was. Estimates use each vendor's standard short-context rate, so
-long prompts, cache writes and priority tiers cost more than estimated.
-
-With the `billing` entitlement, **Sell prices** takes your own price per
-million tokens by model id, `driver/model`, or `default`, and History and the
-CSV export gain a **billable** column next to the provider's cost. For an
-engine that reports no cost, a price you set for that exact model also
-replaces the list price in its estimate; `default` is used only for models
-the list does not know. Both are plain settings in `config.json` (`budgets`,
-`billing`) and through `PUT /api/config`.
+The usage ledger records provider-reported costs when available. For providers
+that report tokens without a price, the server estimates the cost using its
+built-in model-price list. Unknown prices appear as unpriced turns. The
+[usage caps](usage-caps.md) cover unattended work and owner-configured limits.
 
 ## A bot that also runs outside the server
 

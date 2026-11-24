@@ -1,7 +1,5 @@
 import { redactSecretsInText } from "../../shared/redact.ts";
-import type { PriceList } from "../prices.ts";
 import type { RequestAuth } from "../request-auth.ts";
-import type { SpendState } from "../spend.ts";
 import type { UsageCapView } from "../host/usage-cap-gate.ts";
 import {
   flushUsageLedger,
@@ -23,13 +21,10 @@ import { PASS, type RouteHandler } from "./table.ts";
 
 export interface UsageRouteDeps {
   dataDir: string;
-  prices(): PriceList | null;
-  budget(): SpendState | null;
   /** The open usage caps with their use now, for the owner; null for anyone else. */
   caps(auth: RequestAuth): UsageCapView | null;
   /** Whether this engine is signed in with a subscription now: its dollars are an estimate nobody is billed. */
   onPlan(instanceId: string): boolean;
-  currency(): string;
   recorder: TraceServiceDeps["recorder"];
   messages: TraceServiceDeps["messages"];
   liveBot: TraceServiceDeps["liveBot"];
@@ -103,7 +98,6 @@ export function createUsageRoutes(deps: UsageRouteDeps): RouteHandler {
     if (!range) return json(res, 400, { error: "from and to must be YYYY-MM-DD, from no later than to, at most a year apart" });
     await flushUsageLedger(deps.dataDir);
     const rows = readUsage(deps.dataDir, range).map(deps.rowFor(auth));
-    const prices = deps.prices();
     if (path === "/api/usage.csv") {
       const stamp = (date: Date) => date.toISOString().slice(0, 10);
       res.writeHead(200, {
@@ -111,7 +105,7 @@ export function createUsageRoutes(deps: UsageRouteDeps): RouteHandler {
         "content-disposition": `attachment; filename="usage-${stamp(range.from)}-${stamp(range.to)}.csv"`,
         "cache-control": "no-store",
       });
-      res.end(usageCsv(rows, prices));
+      res.end(usageCsv(rows, null));
       return;
     }
     const requested = url.searchParams.get("groupBy") ?? "bot";
@@ -130,11 +124,11 @@ export function createUsageRoutes(deps: UsageRouteDeps): RouteHandler {
       to: range.to.toISOString(),
       groupBy,
       splitBy,
-      ...summarizeUsage(rows, groupBy, prices, splitBy),
-      budget: deps.budget(),
+      ...summarizeUsage(rows, groupBy, null, splitBy),
+      budget: null,
       caps: deps.caps(auth),
       notBilled: notBilledShare(rows, deps.onPlan),
-      billing: prices ? { currency: deps.currency() } : null,
+      billing: null,
     });
   };
 }

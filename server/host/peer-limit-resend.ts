@@ -62,7 +62,6 @@ export interface PeerLimitResendDeps<Opts, Outcome> {
     current: BotRecord, raw: unknown, updateBotDefault: boolean, resetApprovalToAsk: boolean, requireAvailableModel?: boolean,
   ): ReturnType<QuotaSwitchDeps["gate"]>;
   /** Throws when the spend cap is reached. */
-  assertWithinBudget(): void;
   /** A teammate's hand-off: its node has a parent. */
   handedOff(nodeId: string): boolean;
   /** A thread a guest drives. */
@@ -187,7 +186,6 @@ export function createPeerLimitResend<Opts extends PeerTurnOpts<Outcome>, Outcom
           { driverKind: target.driverKind, capabilities: target.adapter.capabilities }) : undefined);
       if (refusal || !checked.ok) return giveUp(refusal);
       try {
-        deps.assertWithinBudget();
         store.switchTaskModel(turn.botId, threadId, checked.selection, false, false, { ...deps.hostedModels?.resetTask(from, checked.selection), rewound: true });
       } catch (error) {
         return giveUp(error instanceof Error ? error.message : String(error));

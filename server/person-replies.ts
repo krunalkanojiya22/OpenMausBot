@@ -12,7 +12,6 @@ import type { UsageTrigger } from "./usage-ledger.ts";
 export interface PersonReplyDeps {
   store: Pick<Store, "group" | "groupByThread" | "groupTaskByThread" | "messagesFor" | "patchMessage" | "taskByThread">;
   sendSequencer: Pick<SendSequencer, "run">;
-  assertWithinBudget(): void;
   messageSender(auth: RequestAuth): ResolvedSender | undefined;
   usageTriggerFor(auth: RequestAuth): UsageTrigger;
   groupThreadIsWorking(groupId: string, threadId: string): boolean;
@@ -84,7 +83,6 @@ export function createPersonReplies(deps: PersonReplyDeps) {
 
       const refused = reply.refusal?.();
       if (refused) throw conflict(refused);
-      deps.assertWithinBudget();
       const sender = deps.messageSender(auth);
       const trigger = deps.usageTriggerFor(auth);
       if (group) {

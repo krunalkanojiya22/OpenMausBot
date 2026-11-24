@@ -4,8 +4,6 @@ import type { Connect, Plugin } from "vite";
 import { configDefaults, defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-import { DurationSequencer } from "./scripts/testing/duration-sequencer.ts";
-import { hostE2eOnly, portableE2eFiles } from "./scripts/testing/host-e2e.ts";
 import { hostTimeout } from "./server/testing/host-timeout.ts";
 
 // The About dialog's version, inlined at build time: the preload bridge is
@@ -14,7 +12,6 @@ const { version } = JSON.parse(
   readFileSync(fileURLToPath(new URL("./package.json", import.meta.url)), "utf8"),
 ) as { version: string };
 
-const root = fileURLToPath(new URL(".", import.meta.url));
 const workers = Number(process.env.OMB_VITEST_WORKERS) || 1;
 const page = (file: string) => fileURLToPath(new URL(file, import.meta.url));
 
@@ -38,7 +35,6 @@ const include = [
   "src/**/*.test.ts",
   "shared/**/*.test.ts",
   "companion/**/*.test.ts",
-  "enterprise/**/*.test.ts",
   "connector/**/*.test.ts",
   "scripts/**/*.test.mjs",
   "scripts/**/*.test.ts",
@@ -58,19 +54,12 @@ export default defineConfig({
     // shadows the DOM storage, so UI tests see an empty or missing store.
     execArgv: ["--no-experimental-webstorage"],
     include,
-    // OMB_VITEST_E2E=host (CI's Windows and macOS shards) leaves the e2e files that run on Linux only.
-    exclude: [...configDefaults.exclude, ...(hostE2eOnly() ? portableE2eFiles(root, include) : [])],
+    exclude: configDefaults.exclude,
     setupFiles: ["server/testing/setup.ts", "src/testing/all-locales.ts"],
     // One file at a time by default: the suite spawns fake provider CLIs and real
-    // harness servers, which a laptop feels. CI sets its runner's count (scripts/ci-scope.mjs).
+    // harness servers.
     fileParallelism: workers > 1,
     maxWorkers: workers,
-    // --shard splits the files by recorded CI seconds, not count
-    sequence: { sequencer: DurationSequencer },
-    // Known flakes in scripts/testing/ci-retry-list.json get two retries in
-    // CI only, each reported.
-    runner: "./scripts/testing/ci-retry-runner.ts",
-    // Doubled on Windows, whose runners are about 1.45x slower.
     testTimeout: hostTimeout(20_000),
     hookTimeout: hostTimeout(30_000),
   },

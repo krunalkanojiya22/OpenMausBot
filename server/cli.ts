@@ -24,7 +24,7 @@ import { phonePairingLink } from "../shared/pairing-link.ts";
 import { parseAllowList } from "./account-signin.ts";
 import { appendAdminAction, flushAdminActivity, sharedSignIn } from "./admin-activity.ts";
 import { bindDecisionRetention, decisionRetentionDays } from "./decision-log.ts";
-import { hostedWorkspaceConfigured } from "./enterprise.ts";
+import { hostedWorkspaceConfigured } from "./hosted-workspace.ts";
 import { reportableServerVersion, serverVersion } from "./environment.ts";
 import { resolveLoopbackTrust } from "./request-auth.ts";
 import { CRASH_EXIT_CODE, crashed, restartLine, restartPolicy } from "./restart.ts";
@@ -102,10 +102,7 @@ export interface CliOptions {
   slug?: string;
   admins?: string[];
   members?: string[];
-  brandFile?: string;
   anthropicKeyFile?: string;
-  cap?: number;
-  licenseKey?: string;
   memory?: string;
   dryRun?: boolean;
   yes?: boolean;
@@ -195,10 +192,7 @@ export function parseArgs(argv: string[], env: NodeJS.ProcessEnv = process.env, 
       else if (options.command === "fleet" && options.fleetAction === "users" && options.slug && !options.fleetUserAction && (arg === "add" || arg === "remove")) { options.fleetUserAction = arg; options.email = value(); }
       else if (options.command === "fleet" && arg === "--admin") options.admins = [...(options.admins ?? []), value()];
       else if (options.command === "fleet" && arg === "--member") options.members = [...(options.members ?? []), value()];
-      else if (options.command === "fleet" && arg === "--brand") options.brandFile = resolve(value());
       else if (options.command === "fleet" && arg === "--anthropic-key-file") options.anthropicKeyFile = resolve(value());
-      else if (options.command === "fleet" && arg === "--cap") options.cap = Number(value());
-      else if (options.command === "fleet" && arg === "--license-key") options.licenseKey = value();
       else if (options.command === "fleet" && arg === "--memory") options.memory = value();
       else if (options.command === "fleet" && arg === "--dry-run") options.dryRun = true;
       else if (options.command === "fleet" && arg === "--yes") options.yes = true;
@@ -222,7 +216,6 @@ export function parseArgs(argv: string[], env: NodeJS.ProcessEnv = process.env, 
     if (!options.fleetAction) return { error: "fleet needs one of: init --domain HOST [--operator USER], create NAME --admin EMAIL, list, users NAME add|remove EMAIL, suspend NAME, resume NAME, delete NAME --yes, upgrade, agent" };
     if (["create", "users", "suspend", "resume", "delete"].includes(options.fleetAction) && !options.slug) return { error: `fleet ${options.fleetAction} needs a workspace name` };
     if (options.fleetAction === "users" && !options.fleetUserAction) return { error: "fleet users needs: NAME add|remove EMAIL [--chat-only]" };
-    if (options.cap !== undefined && (!Number.isFinite(options.cap) || options.cap < 0)) return { error: "--cap must be a dollar amount of 0 or more" };
   }
   return options;
 }
@@ -1011,7 +1004,6 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
           group: options.group,
           node: process.execPath,
           script: process.argv[1] ?? "",
-          licenseKey: options.licenseKey ?? process.env.OMB_LICENSE_KEY,
         }, { log: (line) => console.log(line) });
         await new Promise<void>((resolveStop) => {
           for (const signal of ["SIGTERM", "SIGINT"] as const) process.once(signal, () => resolveStop());
@@ -1025,10 +1017,7 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
         operator: options.operator ?? process.env.SUDO_USER,
         admins: options.admins ?? [],
         members: options.members ?? [],
-        brandFile: options.brandFile,
         anthropicKeyFile: options.anthropicKeyFile,
-        cap: options.cap,
-        licenseKey: options.licenseKey ?? process.env.OMB_LICENSE_KEY,
         memory: options.memory,
         dryRun: options.dryRun ?? false,
         yes: options.yes ?? false,

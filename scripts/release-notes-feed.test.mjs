@@ -1,20 +1,11 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { lf, releaseProblems, releasesSchemaText } from "./check-announcements.mjs";
+import { releaseProblems } from "./check-announcements.mjs";
 import { MAX_RELEASES_FILE_BYTES, releasesText, withRelease } from "./release-notes-feed.mjs";
 
-const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const NOW = Date.parse("2026-11-21T10:00:00Z");
 const empty = releasesText({ $schema: "./releases.schema.json", version: 1, updatedAt: "2026-11-20T00:00:00Z", releases: [] });
 const entry = (version, items = ["**Faster.** Much faster."]) => ({ version, date: "2026-11-20T00:00:00Z", sections: [{ title: "Fixes", items }] });
-
-describe("the committed release notes", () => {
-  it("are valid, with their JSON Schema up to date", () => {
-    expect(releaseProblems(read("announcements/releases.json"))).toEqual([]);
-    expect(lf(read("announcements/releases.schema.json")), "run node scripts/check-announcements.mjs --write-schema").toBe(releasesSchemaText());
-  });
-});
 
 describe("adding a release", () => {
   it("inserts newest first, replaces the same version, and moves updatedAt forward", () => {

@@ -34,7 +34,6 @@ describe("the N-1 rule", () => {
 
   it("is held against the release this tree follows, recorded by the release tooling and not by hand", () => {
     expect(released.version, "server/data-format-released.json is for another release: run `node scripts/record-data-format.mjs` only as part of a version bump").toBe(VERSION);
-    expect(readFileSync(join(ROOT, ".github", "workflows", "prepare-release.yml"), "utf8")).toContain("node scripts/record-data-format.mjs");
   });
 
   it("fails a format bump that skips the two-release step", () => {

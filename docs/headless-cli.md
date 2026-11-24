@@ -539,28 +539,17 @@ The visitors read sites nobody vetted. A Claude bot keeps its built-in tools
 can do no harm, such as a throwaway sandbox like Launch Room's, or give them
 an engine that can limit built-in tools.
 
-## In CI
+## Running from scripts
 
-```yaml
-# .github/workflows/rehearse.yml (a sketch)
-- run: npm install -g openmausbot @anthropic-ai/claude-code
-- run: openmausbot serve --no-pair --data-dir "$RUNNER_TEMP/omb" &
-  env: { OMB_ANTHROPIC_API_KEY: "${{ secrets.ANTHROPIC_API_KEY }}" }   # the workspace's Claude key from the start
-- run: openmausbot doctor --wait 2m          # the server answers and an engine is ready
-- run: openmausbot team apply team.yaml
-- run: openmausbot run "Release checker" "Check the deploy at ${{ env.URL }}" --timeout 20m --strict --export ./out
-- uses: actions/upload-artifact@v4
-  with: { name: release-check, path: ./out }
+```sh
+openmausbot doctor --wait 2m
+openmausbot team apply team.yaml
+openmausbot run "Release checker" "Check the deploy at $URL" --timeout 20m --strict --export ./out
 ```
 
-`doctor --wait` waits for an engine too, so the server gets its key in its
-own environment, as here (`OMB_ANTHROPIC_API_KEY`; the team file's `engines:`
-section, or `openmausbot engine set`, can set it later instead).
-
-The step fails when the job fails (exit 1), needs someone (exit 3) or runs out
-of time (exit 4). To drive a workspace that is already running elsewhere, set
-`OPENMAUSBOT_URL` and pass a token made with `openmausbot connect` as a secret
-file (`--token-file`).
+The command exits with 1 when the job fails, 3 when it needs someone, or 4
+when it times out. For a remote workspace, set `OPENMAUSBOT_URL` and use
+`--token-file` with a token made through `openmausbot connect`.
 
 ## For other agents
 

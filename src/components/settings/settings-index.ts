@@ -1,5 +1,5 @@
 import {
-  Archive, ArrowLeftRight, Bot, Coins, CreditCard, LockKeyhole, Monitor, Network, Palette, Server, SlidersHorizontal, Smartphone, Sparkles, Users,
+  Archive, ArrowLeftRight, Bot, Coins, CreditCard, LockKeyhole, Monitor, Network, Palette, SlidersHorizontal, Smartphone, Sparkles, Users,
   type LucideIcon,
 } from "lucide-react";
 import type { LocaleKey } from "@/locales";
@@ -29,7 +29,6 @@ export interface SettingsContext {
   plan: boolean;
   organization: boolean;
   environments: boolean;
-  installations: boolean;
   skills: boolean;
   advanced: boolean;
 }
@@ -76,8 +75,6 @@ export const SETTINGS_PAGES: readonly SettingsPage[] = [
   { id: "people", owner: "place", labelKey: "settings.section.people", icon: Users,
     when: (ctx) => !ctx.client && ctx.admin && (ctx.team || (!ctx.desktop && !ctx.cloud)),
     synonyms: ["people", "members", "invite", "roles", "bot access", "sharing", "team"] },
-  { id: "installations", owner: "place", labelKey: "settings.section.workspaces", icon: Server, when: (ctx) => !ctx.client && ctx.installations,
-    synonyms: ["installations", "fleet", "clients", "tenants"] },
   { id: "account", owner: "account", labelKey: "settings.page.account", when: () => true,
     synonyms: ["account", "sign in", "log in", "log out", "sign out", "email", "organization", "mausbot cloud"] },
   { id: "plan", owner: "account", labelKey: "settings.page.plan", icon: CreditCard, when: (ctx) => !ctx.client && ctx.plan,
@@ -120,7 +117,7 @@ export const LEGACY_SETTINGS: Record<Exclude<AppSettingsSection, SettingsPageId>
   botAccess: () => ({ page: "people", anchor: "bot-access" }),
   activity: () => ({ page: "data", anchor: "activity" }),
   backups: () => ({ page: "transfer", anchor: "take-out" }),
-  workspaces: () => ({ page: "installations" }),
+  workspaces: () => ({ page: "overview" }),
   skills: () => ({ page: "bots", anchor: "skills" }),
   import: () => ({ page: "transfer", anchor: "bring-in" }),
   updates: (ctx) => (ctx.desktop ? { page: "app", anchor: "updates" } : { page: "overview" }),
@@ -147,7 +144,7 @@ export function resolveSettingsTarget(requested: AppSettingsSection, ctx: Settin
 /** A context with every page showing (Advanced mode), for tests and previews to narrow down. */
 export const fullContext = (over: Partial<SettingsContext> = {}): SettingsContext => ({
   desktop: true, here: true, home: true, cloud: false, team: false, client: false, admin: true, places: false, plan: true,
-  organization: false, environments: true, installations: false, skills: false, advanced: true, ...over,
+  organization: false, environments: true, skills: false, advanced: true, ...over,
 });
 
 /** One row, section or page search can open. `label` beats `labelKey` where the name is not a string of the app's. */

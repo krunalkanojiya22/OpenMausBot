@@ -92,7 +92,6 @@ async function fixture() {
     store,
     viewerFor: () => ({}),
     visibleTo: () => ({ bot: () => true, group: () => true, thread: () => true }),
-    workspaceAccess: () => null,
     desktopMutationToken: () => undefined,
     companionMutationToken: () => undefined,
     cliOwnerToken: () => undefined,

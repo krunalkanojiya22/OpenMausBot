@@ -20,7 +20,7 @@ function harness(queued = true) {
   const entered = deferred(), release = deferred(), sends: string[] = [];
   const replies = createPersonReplies({
     store, sendSequencer: new SendSequencer(),
-    assertWithinBudget() {}, messageSender: () => undefined, usageTriggerFor: () => ({ kind: "user" }),
+    messageSender: () => undefined, usageTriggerFor: () => ({ kind: "user" }),
     groupThreadIsWorking: () => false, startGroupTurn: () => {},
     async startOrQueueDirectMessage(botId, threadId, text, target, sendId) {
       sends.push(sendId);

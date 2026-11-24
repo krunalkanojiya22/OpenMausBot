@@ -40,11 +40,6 @@ Create a second Vercel project beside the existing `openmausbot.com` project:
 4. Set the production branch to `main` and deploy.
 5. Add `docs.openmausbot.com` under **Settings → Domains**.
 
-For an immediate changelog refresh after each desktop release, create a Vercel
-Deploy Hook for the production branch and save it in the GitHub repository as
-the `DOCS_DEPLOY_HOOK_URL` Actions secret. Without the optional hook, the next
-normal docs deployment still pulls the current published releases.
-
 Vercel will build the Next.js docs app, publish every push to `main`, and create
 preview URLs for documentation pull requests. Keep `openmausbot.com` on the
 existing marketing project and add a Docs link there after the new domain is

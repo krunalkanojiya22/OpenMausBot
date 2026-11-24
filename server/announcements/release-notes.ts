@@ -2,7 +2,6 @@
 // beside the announcement cards, and handed to pages with them at GET /api/announcements.
 import { join } from "node:path";
 
-import bundledReleasesJson from "../../announcements/releases.json" with { type: "json" };
 import { parseReleaseFeed, RELEASES_URL, type ReleaseEntry, type ReleaseFeed } from "../../shared/release-notes.ts";
 import { DATA_DIR } from "../config.ts";
 import { RemoteJsonFile, type RemoteFileOptions } from "./remote-file.ts";
@@ -10,9 +9,7 @@ import { RemoteJsonFile, type RemoteFileOptions } from "./remote-file.ts";
 /** Twenty releases' notes come to about 60 KB. */
 export const RELEASES_MAX_BYTES = 128 * 1024;
 
-const parsedBundle = parseReleaseFeed(bundledReleasesJson, { strict: true, nowMs: Number.MAX_SAFE_INTEGER / 2 });
-if (!parsedBundle.ok) throw new Error(`The bundled release notes are invalid (${parsedBundle.error})`);
-export const BUNDLED_RELEASES: ReleaseFeed = parsedBundle.feed;
+export const BUNDLED_RELEASES: ReleaseFeed = { version: 1, updatedAt: new Date(0).toISOString(), releases: [] };
 
 export function releasesCachePath(dataDir: string): string {
   return join(dataDir, "providers", "announcements", "releases.json");

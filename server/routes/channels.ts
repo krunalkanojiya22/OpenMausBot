@@ -13,7 +13,6 @@ import {
   restoreHeldChannelQueue,
   settleHeldChannelQueueHead,
 } from "../channel-queue.ts";
-import { DATA_DIR, type AppConfig } from "../config.ts";
 import type { ProviderInstance, SteerOutcome } from "../contracts.ts";
 import { cancelledChatFollowup } from "../message-db.ts";
 import { messageTextRefusal } from "../message-text.ts";
@@ -27,7 +26,6 @@ import { parseConversationTurnTimeout } from "../room-turn-timeout.ts";
 import type { RoutineManager } from "../routines.ts";
 import { acceptedSendMatch, parseSendId, parseStopId, sendFingerprint, StopReceipts, type SendSequencer } from "../send-idempotency.ts";
 import type { SkillReview } from "../skill-review.ts";
-import { assertWithinBudget } from "../spend.ts";
 import { mentionedBots, type BotRecord, type GroupRecord, type GroupTaskPatch, type Message, type Store } from "../store.ts";
 import { roomLeadId, steerMeantForSpeaker } from "../room-steer-addressee.ts";
 import type { ThreadStarters } from "../thread-starters.ts";
@@ -51,7 +49,6 @@ export interface ChannelRouteDeps {
   store: Pick<Store,
     | "group" | "groupTaskByThread" | "bot" | "switchGroupTask" | "patchGroupTask" | "patchGroup" | "markGroupThreadUnread" | "messagesFor" | "groupTasks" | "deleteGroupTasks" | "deleteGroup"
     | "createGroupTask" | "forkGroupTask" | "appendMessage">;
-  cfg: Pick<AppConfig, "budgets">;
   /** What people's lines are called in this conversation (replies.ts PersonName). */
   userName(threadId: string): PersonName;
   /** The desktop app owns this server, so a loopback caller is its owner. */
@@ -116,7 +113,7 @@ type StopAnswer = { status: 200 | 403 | 409; body: { ok: true } | { error: strin
 
 export function createChannelRoutes(deps: ChannelRouteDeps): RouteHandler {
   const {
-    store, cfg, broadcast, notificationListed, actorKey, threadStarters, phoneSecretSubmissions, sendSequencer, roomMemberContexts, skillReview,
+    store, broadcast, notificationListed, actorKey, threadStarters, phoneSecretSubmissions, sendSequencer, roomMemberContexts, skillReview,
     groupSpeakers, groupTurnOperations, lastReply, cloudThreadRefusal, messageSender, usageTriggerFor, publicGroupState,
     groupWithThread, updateChannel, groupIsWorking, groupThreadIsWorking, readCursor, pageSize, messagePage,
     resolveReplyTarget, runningTurnInstance, startGroupTurn, engineSteersImages, applyRoomHoldsFromMessage, cancelGroupTurnOperations,
@@ -378,11 +375,6 @@ export function createChannelRoutes(deps: ChannelRouteDeps): RouteHandler {
       if (mentions === null) return json(res, 400, { error: "mentions must be a list of up to 20 bot ids" });
       const threadId = body.threadId ?? group.threadId;
       const trigger = usageTriggerFor(auth);
-      try {
-        assertWithinBudget(cfg, DATA_DIR);
-      } catch (error) {
-        return json(res, 409, { error: error instanceof Error ? error.message : String(error), code: "spend_cap" });
-      }
       const ownsThread = group.dm
         ? group.threadId === threadId
         : Boolean(store.groupTaskByThread(group.id, threadId));

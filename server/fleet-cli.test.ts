@@ -98,9 +98,9 @@ describe("openmausbot fleet", () => {
   });
 
   it("creates a workspace as root in order, and stops at the first failed step without repeating secrets", async () => {
-    const { deps, calls, files } = machine({ root: true, files: { ...withRegistry(), "/srv/brand.json": '{"name":"Acme"}', "/srv/key.txt": "sk-ant-fixture\n" } });
+    const { deps, calls, files } = machine({ root: true, files: { ...withRegistry(), "/srv/key.txt": "sk-ant-fixture\n" } });
     const { io: log, out } = io();
-    const code = await runFleetCommand({ ...base, action: "create", slug: "acme", admins: ["ada@example.test"], members: ["@acme.test"], brandFile: "/srv/brand.json", anthropicKeyFile: "/srv/key.txt", cap: 40, licenseKey: "omb1.k" }, log, deps);
+    const code = await runFleetCommand({ ...base, action: "create", slug: "acme", admins: ["ada@example.test"], members: ["@acme.test"], anthropicKeyFile: "/srv/key.txt" }, log, deps);
     expect(code).toBe(0);
     expect(calls.slice(0, 5)).toEqual([
       `write ${registryFile} 600`,
@@ -110,10 +110,8 @@ describe("openmausbot fleet", () => {
       "write /var/lib/openmausbot/acme/.openmausbot/config.json 600 as omb-acme",
     ]);
     expect(JSON.parse(files.get("/var/lib/openmausbot/acme/.openmausbot/config.json")!)).toEqual({
-      signIn: { admins: ["ada@example.test"], members: ["@acme.test"] }, anthropic: { key: "sk-ant-fixture" }, budgets: { monthlyUsd: 40 },
+      signIn: { admins: ["ada@example.test"], members: ["@acme.test"] }, anthropic: { key: "sk-ant-fixture" },
     });
-    expect(files.get("/var/lib/openmausbot/acme/.openmausbot/brand.json")).toBe('{"name":"Acme"}');
-    expect(files.get("/etc/openmausbot/instances/acme.env")).toContain("OMB_LICENSE_KEY=omb1.k");
     expect(calls).toContain("health http://127.0.0.1:8810/api/health");
     expect(calls.at(-1)).toBe(`write ${registryFile} 600`);
     expect(JSON.parse(files.get(registryFile)!).workspaces.acme).toMatchObject({ port: 8810, host: "acme.agentada.cc" });

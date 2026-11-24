@@ -37,8 +37,6 @@ export interface FleetInput {
   operator?: string;
   admins: string[];
   members: string[];
-  brandFile?: string;
-  brandJson?: string;
   anthropicKeyFile?: string;
   anthropicKey?: string;
   anthropicUrl?: string;
@@ -47,8 +45,6 @@ export interface FleetInput {
   openrouterModels?: string[];
   openrouterDefault?: boolean;
   portalUrl?: string;
-  cap?: number;
-  licenseKey?: string;
   memory?: string;
   dryRun: boolean;
   yes: boolean;
@@ -324,16 +320,12 @@ export function planFleetAction(input: FleetInput, deps: FleetDeps): FleetStep[]
       for (const path of [workspaceHome(layout, input.slug), posix.join(layout.instancesDir, `${input.slug}.env`), posix.join(layout.caddyDir, `${input.slug}.caddy`), posix.join(posix.dirname(layout.unitFile), `openmausbot@${input.slug}.service.d`)]) {
         if (deps.pathExists(path)) throw new Error(`workspace path already exists: ${path}; recover or remove it explicitly before provisioning a fresh workspace`);
       }
-      const brandJson = input.brandJson ?? (input.brandFile ? deps.readText(input.brandFile) : undefined);
-      if (input.brandFile && brandJson === null) throw new Error(`${input.brandFile} not found`);
-      if (brandJson) JSON.parse(brandJson);
       const anthropicKey = input.anthropicKey?.trim() || (input.anthropicKeyFile ? deps.readText(input.anthropicKeyFile)?.trim() : undefined);
       if (input.anthropicKeyFile && !anthropicKey) throw new Error(`${input.anthropicKeyFile} is missing or empty`);
       return createPlan({
         registry,
         slug: input.slug,
-        seed: { admins: input.admins, members: input.members, ...(anthropicKey ? { anthropicKey } : {}), ...(input.anthropicUrl ? { anthropicUrl: input.anthropicUrl } : {}), ...(input.portalUrl ? { portalUrl: input.portalUrl } : {}), ...(input.cap !== undefined ? { monthlyCapUsd: input.cap } : {}), ...(brandJson ? { brandJson } : {}), openrouterKey: input.openrouterKey, openrouterUrl: input.openrouterUrl, openrouterModels: input.openrouterModels, openrouterDefault: input.openrouterDefault },
-        ...(input.licenseKey ? { licenseKey: input.licenseKey } : {}),
+        seed: { admins: input.admins, members: input.members, ...(anthropicKey ? { anthropicKey } : {}), ...(input.anthropicUrl ? { anthropicUrl: input.anthropicUrl } : {}), ...(input.portalUrl ? { portalUrl: input.portalUrl } : {}), openrouterKey: input.openrouterKey, openrouterUrl: input.openrouterUrl, openrouterModels: input.openrouterModels, openrouterDefault: input.openrouterDefault },
         ...(input.memory ? { memoryMax: input.memory } : {}),
         layout,
       }).steps;

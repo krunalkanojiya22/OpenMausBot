@@ -68,7 +68,7 @@ function main() {
   for (const sha of pushedCommits(readFileSync(0, "utf8"))) {
     // The checks read the working tree, so they can only speak for what is checked out.
     if (sha !== head) {
-      console.log(`pre-push: ${sha.slice(0, 9)} is not checked out here, so CI will check it`);
+      console.log(`pre-push: ${sha.slice(0, 9)} is not checked out here; skipped local checks`);
       continue;
     }
     const base = git("merge-base", "origin/main", sha).trim();
@@ -78,22 +78,22 @@ function main() {
   for (const { name, command, args, guards } of checksFor(present)) {
     const left = BUDGET_MS - (Date.now() - started);
     if (left <= 0) {
-      console.log(`pre-push: out of time before ${name}, so CI will check it`);
+      console.log(`pre-push: out of time before ${name}; check skipped`);
       break;
     }
     let bad;
     if (guards) {
       const verdict = runGuards(guards, present, left);
-      if (verdict.unknown) console.log(`pre-push: ${name} did not settle it (${verdict.unknown}), so CI will check them`);
+      if (verdict.unknown) console.log(`pre-push: ${name} did not finish (${verdict.unknown})`);
       bad = verdict.failed;
     } else {
       const run = spawnSync(command, args, { encoding: "utf8", timeout: left, maxBuffer: 16 * 1024 * 1024 });
-      if (run.error) console.log(`pre-push: ${name} did not finish (${run.error.code}), so CI will check it`);
+      if (run.error) console.log(`pre-push: ${name} did not finish (${run.error.code})`);
       bad = !run.error && run.status !== 0;
       if (bad) console.error(`${run.stdout}${run.stderr}`);
     }
     if (bad) {
-      console.error(`pre-push: ${name} failed. Fix it, or push with OMB_SKIP_HOOKS=1 to let CI report it.`);
+      console.error(`pre-push: ${name} failed. Fix it before pushing.`);
       process.exitCode = 1;
       return;
     }
@@ -105,6 +105,6 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   try {
     main();
   } catch (error) {
-    console.log(`pre-push: could not read this push (${String(error.message).split("\n")[0]}), so CI will check it`);
+    console.log(`pre-push: could not read this push (${String(error.message).split("\n")[0]}); skipped local checks`);
   }
 }

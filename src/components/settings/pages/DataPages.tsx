@@ -11,7 +11,6 @@ import { ThreadCleanupSettings } from "../../ThreadCleanupSettings";
 import { UsageSection } from "../../UsageSection";
 import { VaultSettings } from "../../VaultSettings";
 import { WorkspaceBackupSettings } from "../../WorkspaceBackupSettings";
-import { WorkspacesSection } from "../../WorkspacesSection";
 import { useSettingsShell } from "../settings-shell";
 import { MoveSection } from "./PlacePages";
 
@@ -56,8 +55,4 @@ export function PeoplePage() {
     {ctx.team && <SettingsGroup label={t("settings.section.botAccess")} block="bot-access"
       footnote={!ctx.desktop ? t("settings.people.activityIn") : undefined}><AccessOverview /></SettingsGroup>}
   </>;
-}
-
-export function InstallationsPage() {
-  return <WorkspacesSection />;
 }

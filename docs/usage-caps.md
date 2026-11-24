@@ -145,20 +145,6 @@ The API, for the owner:
   caps. On a server other people sign in to, the change is recorded in
   Settings → Activity like any other settings change.
 
-## With the licensed monthly spend limit
-
-The licensed edition's **Monthly spend limit** (`budgets.monthlyUsd`, the
-`budgets` entitlement) is unchanged: it stops every kind of turn, has its own
-warning level, and notifies admins at the warning and at the limit. Both read
-the same totals from the same engine (`server/usage-caps.ts`). When both are
-set, each applies on its own, and whichever is reached first stops the work
-it covers. A Bot API call it refuses answers `429` with a `Retry-After`
-header up to the start of the next UTC month.
-
-The totals are kept as running sums: a check reads the month's ledger file
-once, and after that only the lines appended since, and only when the file's
-size or time changed (looked at most every 15 seconds).
-
 ## Checks
 
 ```sh
